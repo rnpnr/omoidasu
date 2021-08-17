@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# generates furigana in the format used by the rubify script
+# this is a little hacky
+
+kakasi -JH -Fl":" -Fr"}" -f -s -S"{" -i utf-8 \
+| sed -e 's:^\(.\):{\1:' -e 's:\({\([^{]*\)}\):\[\2\]:g' -e 's:{::g'

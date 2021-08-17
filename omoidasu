@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# create a config file in the current directory
+
+if [ -f ./config ]; then
+	echo "config already exists"
+	exit 1
+fi
+
+cat > config <<EOF
+# omoidasu config
+
+# program used to determine the location of the cards requested by oboeru
+FETCHCARD=fetchcard
+
+# program used to convert the cards into single line input apporiate
+# for oboeruhttp. should output "%s\t%s" (notice the "\t")
+CONVERTCARD=card2html
+
+# futher filter for card after CONVERTCARD
+FILTER=rubify
+
+# fmt for timestamping new cards. needs to be the same format that was
+# used in config.h when compiling oboeru. backup timestamp can be anything
+TIMEFMT="+%Y年%m月%d日%H時%M分"
+
+# templates to use for new cards. the variables can be commented or empty
+# the default names will be "front" and "back"
+FRONT_TEMP="front.md"
+BACK_TEMP="back.md"
+
+# port to run oboeruhttp on
+PORT=6969
+
+# html strings to pass to oboeruhttp
+PASS="当たり"
+FAIL="外れ"
+QUIT="止める"
+SHOW="示す"
+BYE="(=^ᆺ^)ﾉ<br>バイバイ～"
+
+# use these to overwrite the default env variables if you want
+#EDITOR=vis
+#VISUAL=vis
+EOF

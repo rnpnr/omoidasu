@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# takes the output of oboeru finds a card's path
+
+read input
+
+deck=$(echo "$input" | cut -f 1 | cut -d '.' -f 1)
+id=$(echo "$input" | cut -f 2)
+
+printf "%s\n" "$deck/$id"

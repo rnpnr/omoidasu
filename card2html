@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# takes a path from stdin and outputs the card data in a format usable
+# by oboeruhttp on stdout
+
+read path
+front=$(smu "$path"/front.md | tr -d '\n' |
+	sed 's;src="\([^"]*\)";src="/_/'$path'/\1";g')
+back=$(smu "$path"/back.md | tr -d '\n' |
+	sed 's;src="\([^"]*\)";src="/_/'$path'/\1";g')
+
+extra="$path"/extra.html
+if [ -f "$extra" ]; then
+	extra=$(cat "$extra" | tr -d '\n')
+	front="$(echo "$front" | sed 's|==EXTRA==|'"$extra"'|g')"
+	back="$(echo "$back" | sed 's|==EXTRA==|'"$extra"'|g')"
+fi
+
+printf "%s\t%s" "$front" "$back"

@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# generates a card with the next available id in the provided deck
+# ledger. a folder is created for it and the templates files are copied in.
+# finally the new card is opened in an editor
+
+. ./config
+
+usage() {
+	echo "$0 name.deck [extra]"
+	exit 1
+}
+
+[ $# -lt 1 ] && usage
+[ $# -gt 2 ] && usage
+
+tmp=$(mktemp)
+die() {
+	[ -f $tmp ] && rm -f $tmp
+}
+trap die EXIT INT TERM
+
+id=$(nextcardid "$1")
+time=$(date $TIMEFMT)
+
+printf "%s\t%s\t%s\t%d\t%s\n" "$id" "$time" "$time" 0 "$2" >> "$1"
+
+sort "$1">|"$tmp"
+mv "$tmp" "$1"
+
+deck=$(echo "$1" | cut -d '.' -f 1)
+path=$(printf "%s/%s" "$deck" "$id")
+front=${FRONT_TEMP:-front}
+back=${BACK_TEMP:-back}
+
+mkdir -p $path
+cp $front $back $path/
+
+$EDITOR "$path/$back" "$path/$front"

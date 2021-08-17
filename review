@@ -1,0 +1,30 @@
+#!/bin/sh
+
+. ./config
+
+usage() {
+	echo "usage: $0 cards.deck [cards1.deck ...]"
+	exit 1
+}
+
+[ $# -lt 1 ] && usage
+[ ! -f $1 ] && usage
+
+fifo=fifo.$$
+die() {
+	rm -f $fifo
+}
+trap die EXIT INT TERM
+
+mkfifo -m 0600 $fifo
+
+oboeru $fifo "$@" \
+| $FETCHCARD \
+| $CONVERTCARD \
+| $FILTER \
+| oboeruhttp -p "$PORT" -F "$FAIL" -P "$PASS" -Q "$QUIT" -S "$SHOW" -q "$BYE" \
+> $fifo &
+
+browser "localhost:$PORT"
+
+wait
