@@ -2,8 +2,6 @@
 
 # convert kanji reading pairs of the form [kanji:reading] to ruby text
 # ex: echo "[少女:しょうじょ]" | rubify -> <ruby>少女<rt>しょうじょ</rt></ruby>
-# these can be produced with this hack:
-# kakasi -JH -Fl":" -f -s -S"[" -i utf-8 | \
-#	sed -e 's;^\(.\);\[\1;' -e 's;\[\([^]]*\[\);\1;g'
+# these pairs can be produced with the furigana script
 
 s;\[\([^]:]*\):\([^]]*\)\];<ruby>\1<rt>\2</rt></ruby>;g
