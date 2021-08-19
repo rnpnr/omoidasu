@@ -11,17 +11,16 @@ usage() {
 [ ! -f $1 ] && usage
 
 fifo=fifo.$$
+sync=sync.$$
 die() {
-	rm -f $fifo
+	rm -f $fifo $sync
 }
 trap die EXIT INT TERM
 
-mkfifo -m 0600 $fifo
+mkfifo -m 0600 $fifo $sync
 
-oboeru $fifo "$@" \
-| $FETCHCARD \
-| $CONVERTCARD \
-| $FILTER \
+oboeru $fifo "$@" > $sync &
+oboerudata $sync \
 | oboeruhttp -p "$PORT" -F "$FAIL" -P "$PASS" -Q "$QUIT" -S "$SHOW" -q "$BYE" \
 > $fifo &
 

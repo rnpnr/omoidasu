@@ -18,6 +18,7 @@ These scripts assume a directory structure as follows:
 	./
 	  config
 	  deck1.deck
+	  deck1.data
 	  deck1/
 	        cardid1/
 	                front.md
@@ -28,6 +29,7 @@ These scripts assume a directory structure as follows:
 	        cardid2/
 	                ...
 	  deck2.deck
+	  deck2.data
 	  deck2/
 	        ...
 	  ...
@@ -40,9 +42,9 @@ utils. If they don't open an issue.
 * `omoidasu`: creates a default `config` in the current directory.
 * `gencard`: creates a new card and associated directory for the specified
    deck and opens the front and back in an `$EDITOR`.
+* `deck2data`: converts the front and back of the card to the data format
+   expected by oboerudata
 * `review`: ties all the programs together starts reviews on the specified decks
-* `card2html`: converts the front and back of the card to the format
-   expected by oboeruhttp
 * `fetchcard`: takes the deck and id output by oboeru and finds the cards path
 * `nextcardid`: finds the next available id in a supplied deck file
 
