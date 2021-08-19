@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# temporary script to workaround stdio buffering problem
+# takes a deck file and converts all cards to html
+# outputs 1 per line in the form "cardid\tfront\tback"
+
+usage() {
+	echo "usage: $0 cards.deck"
+	exit 1
+}
+
+[ $# -eq 1 ] || usage
+
+deck=$(echo "$1" | cut -d '.' -f 1)
+
+while read line; do
+	id=$(echo "$line" | cut -f 1)
+	path="$deck"/"$id"
+	front=$(smu "$path"/front.md | tr -d '\n' | rubify |
+		sed -e 's;src="\([^"]*\)";src="/_/'$path'/\1";g' \
+		    -e 's:/\&gt;:>:g')
+	back=$(smu "$path"/back.md | tr -d '\n' | rubify |
+		sed -e 's;src="\([^"]*\)";src="/_/'$path'/\1";g' \
+		    -e 's:/\&gt;:>:g')
+
+	extra="$path"/extra.html
+	if [ -f "$extra" ]; then
+		extra=$(cat "$extra" | tr -d '\n')
+		front="$(echo "$front" | sed 's|==EXTRA==|'"$extra"'|g')"
+		back="$(echo "$back" | sed 's|==EXTRA==|'"$extra"'|g')"
+	fi
+
+	printf "%s\t%s\t%s\n" "$id" "$front" "$back"
+done < $1

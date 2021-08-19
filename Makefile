@@ -1,7 +1,7 @@
 PREFIX=/usr/local
 
 SCRIPTS =\
-	card2html\
+	deck2data\
 	fetchcard\
 	furigana\
 	gencard\
