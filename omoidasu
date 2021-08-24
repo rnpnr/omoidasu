@@ -24,6 +24,9 @@ FILTER=rubify
 # used in config.h when compiling oboeru. backup timestamp can be anything
 TIMEFMT="+%Y年%m月%d日%H時%M分"
 
+# ledger field delimiter
+DELIM="\t"
+
 # templates to use for new cards. the variables can be commented or empty
 # the default names will be "front" and "back"
 FRONT_TEMP="front.md"

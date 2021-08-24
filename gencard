@@ -20,12 +20,16 @@ die() {
 }
 trap die EXIT INT TERM
 
+line=$(grep "$DELIM$2\$" $1)
+[ "$line" ] && echo "$2 already in deck:" && echo "$line" && exit 1
+
 id=$(nextcardid "$1")
 time=$(date $TIMEFMT)
 
-printf "%s\t%s\t%s\t%d\t%s\n" "$id" "$time" "$time" 0 "$2" >> "$1"
+printf "%s"$DELIM"%s"$DELIM"%s"$DELIM"%d"$DELIM"%s\n" \
+	"$id" "$time" "$time" 0 "$2" >> "$1"
 
-sort "$1">|"$tmp"
+sort -r "$1">|"$tmp"
 mv "$tmp" "$1"
 
 deck=$(echo "$1" | cut -d '.' -f 1)
@@ -34,6 +38,7 @@ front=${FRONT_TEMP:-front}
 back=${BACK_TEMP:-back}
 
 mkdir -p $path
-cp $front $back $path/
+sed s:==TARGET==:$2:g "$front" >> "$path/$front"
+sed s:==TARGET==:$2:g "$back" >> "$path/$back"
 
-$EDITOR "$path/$back" "$path/$front"
+$EDITOR "$path/$back" "$path/$front" "$path/extra.html" "$1"

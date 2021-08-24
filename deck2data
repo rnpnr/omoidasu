@@ -4,6 +4,8 @@
 # takes a deck file and converts all cards to html
 # outputs 1 per line in the form "cardid\tfront\tback"
 
+. ./config
+
 usage() {
 	echo "usage: $0 cards.deck"
 	exit 1
@@ -14,7 +16,7 @@ usage() {
 deck=$(echo "$1" | cut -d '.' -f 1)
 
 while read line; do
-	id=$(echo "$line" | cut -f 1)
+	id=$(echo "$line" | cut -d $DELIM -f 1)
 	path="$deck"/"$id"
 	front=$(smu "$path"/front.md | tr -d '\n' | rubify |
 		sed -e 's;src="\([^"]*\)";src="/_/'$path'/\1";g' \
