@@ -1,6 +1,7 @@
 PREFIX=/usr/local
 
 SCRIPTS =\
+	amc\
 	deck2data\
 	fetchcard\
 	furigana\

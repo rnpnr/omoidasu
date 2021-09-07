@@ -1,0 +1,133 @@
+#!/bin/sh
+
+# add media to most recent card
+
+AUD_BIT="64k"
+AUD_FMT="opus"
+IMG_FMT="webp"
+IMG_QUA="80"
+
+. ./config
+
+img=1
+aud=1
+deck=""
+
+usage() {
+	echo \
+"$(basename $0) [-i | -a] name.deck
+	-i: img only
+	-a: audio only"
+
+	exit 1
+}
+
+die() {
+	notify "$@"
+	exit 1
+}
+
+getid() {
+	awk -F $DELIM '
+	BEGIN { max = 0 }
+	{
+		w = length($1);
+		if ($0 > max) {
+			max = $0
+		}
+	}
+	END {printf "%0"w"i\n", max}' "$1"
+}
+
+getpath() {
+	local cardid=$(getid $deck)
+	local path=$(dirname "$deck")
+	path="$path/$(basename $deck | cut -d '.' -f 1)"
+	printf "%s/%s" $path $cardid
+}
+
+geturl() {
+	local output=$(mktemp "amc.XXXXXX")
+	output=$(mv "$output" "$output".$AUD_FMT && printf "$output".$AUD_FMT)
+
+	ffmpeg -y \
+		-loglevel error \
+		-i "$1" \
+		-ab "$AUD_BIT" \
+		-ac 2 \
+		-af 'silenceremove=1:0:-50dB' \
+		"$output" 1>/dev/null \
+	|| die "Failed to fetch audio"
+
+	printf "$output"
+}
+
+record() {
+	local output=$(mktemp "amc.XXXXXX")
+	output=$(mv "$output" "$output".$AUD_FMT && printf "$output".$AUD_FMT)
+
+	ffmpeg -y \
+		-loglevel error \
+		-f alsa \
+		-i "hw:Loopback,1" \
+		-ab "$AUD_BIT" \
+		-ac 2 \
+		-af 'silenceremove=1:0:-50dB' \
+		"$output" 1>/dev/null &
+
+	local pid=$(echo $!)
+	herbe "Recording in Progress" "Close to finish"
+	kill -15 $pid
+
+	printf "$output"
+}
+
+audio() {
+	local file
+	local out
+	local path=$(getpath)
+	local url
+
+	case $(printf "url\nrecord" | dmenu -i -p "Audio:") in
+	record) file=$(record) ;;
+
+	url)	herbe "Copy url to Clipboard" "Close to Continue"
+		file=$(geturl $(xclip -o -s clip))
+		;;
+	esac
+
+	if [ -f "$path"/audio.* ]; then
+		out="$path"/audio2.$AUD_FMT
+	else
+		out="$path"/audio.$AUD_FMT
+	fi
+	mv "$file" "$out" \
+	&& herbe "Wrote audio:" "$out"
+}
+
+img() {
+	local file="$(getpath)/img.$IMG_FMT"
+
+	notify "Image Selction"
+	import -window root -quality $IMG_QUA -crop $(slop -f '%g') $IMG_FMT:- \
+	>| "$file"
+	pkill herbe
+	herbe "Wrote image:" "$file"
+}
+
+while getopts "ia" arg; do
+	case "${arg}" in
+	i) aud=0 ;;
+	a) img=0 ;;
+	*) usage ;;
+	esac
+done
+shift $((OPTIND - 1))
+
+[ $img -eq 0 ] && [ $aud -eq 0 ] && usage
+
+deck=$1
+[ -f "$deck" ] || usage
+
+[ $aud -eq 1 ] && audio
+[ $img -eq 1 ] && img
