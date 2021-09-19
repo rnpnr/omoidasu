@@ -12,12 +12,14 @@ IMG_QUA="80"
 img=1
 aud=1
 deck=""
+cardid=0
 
 usage() {
 	echo \
-"$(basename $0) [-i | -a] name.deck
+"$(basename $0) [-i | -a] [-c id] name.deck
 	-i: img only
-	-a: audio only"
+	-a: audio only
+	-c: specify card id"
 
 	exit 1
 }
@@ -40,14 +42,14 @@ getid() {
 }
 
 getpath() {
-	local cardid=$(getid $deck)
 	local path=$(dirname "$deck")
+	[ $cardid -eq 0 ] && cardid=$(getid $deck)
 	path="$path/$(basename $deck | cut -d '.' -f 1)"
 	printf "%s/%s" $path $cardid
 }
 
 geturl() {
-	local output=$(mktemp "amc.XXXXXX")
+	local output=$(mktemp -p /tmp "amc.XXXXXX")
 	output=$(mv "$output" "$output".$AUD_FMT && printf "$output".$AUD_FMT)
 
 	ffmpeg -y \
@@ -63,7 +65,7 @@ geturl() {
 }
 
 record() {
-	local output=$(mktemp "amc.XXXXXX")
+	local output=$(mktemp -p /tmp "amc.XXXXXX")
 	output=$(mv "$output" "$output".$AUD_FMT && printf "$output".$AUD_FMT)
 
 	ffmpeg -y \
@@ -94,6 +96,9 @@ audio() {
 	url)	herbe "Copy url to Clipboard" "Close to Continue"
 		file=$(geturl $(xclip -o -s clip))
 		;;
+	*)
+		return
+		;;
 	esac
 
 	if [ -f "$path"/audio.* ]; then
@@ -115,10 +120,11 @@ img() {
 	herbe "Wrote image:" "$file"
 }
 
-while getopts "ia" arg; do
+while getopts "iac:" arg; do
 	case "${arg}" in
 	i) aud=0 ;;
 	a) img=0 ;;
+	c) cardid=${OPTARG} ;;
 	*) usage ;;
 	esac
 done
