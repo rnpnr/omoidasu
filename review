@@ -19,6 +19,7 @@ trap die EXIT INT TERM
 
 mkfifo -m 0600 $fifo $sync
 
+chmod +w "$@"
 oboeru $fifo "$@" > $sync &
 oboerudata $sync \
 | oboeruhttp -p "$PORT" -F "$FAIL" -P "$PASS" -Q "$QUIT" -S "$SHOW" -q "$BYE" \
@@ -27,3 +28,4 @@ oboerudata $sync \
 browser "localhost:$PORT"
 
 wait
+chmod -w "$@"

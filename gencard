@@ -26,11 +26,13 @@ line=$(grep "$DELIM$2\$" $1)
 id=$(nextcardid "$1")
 time=$(date $TIMEFMT)
 
+chmod +w "$1"
 printf "%s"$DELIM"%s"$DELIM"%s"$DELIM"%d"$DELIM"%s\n" \
 	"$id" "$time" "$time" 0 "$2" >> "$1"
 
 sort -r "$1">|"$tmp"
 mv "$tmp" "$1"
+chmod -w "$1"
 
 deck=$(echo "$1" | cut -d '.' -f 1)
 path=$(printf "%s/%s" "$deck" "$id")
