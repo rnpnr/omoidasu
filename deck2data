@@ -18,14 +18,10 @@ deck=$(echo "$1" | cut -d '.' -f 1)
 while read line; do
 	id=$(echo "$line" | cut -d $DELIM -f 1)
 	path="$deck"/"$id"
-	front=$(smu "$path"/front.md | tr -d '\n' | rubify |
-		sed -e 's;src="\([^"]*\)";src="/_/'$path'/\1";g' \
-		    -e 's:/\&gt;:>:g' -e 's:\&lt;\(/audio\):<\1:g' \
-		    -e 's:\(/audio\)\&gt;:\1>:g')
-	back=$(smu "$path"/back.md | tr -d '\n' | rubify |
-		sed -e 's;src="\([^"]*\)";src="/_/'$path'/\1";g' \
-		    -e 's:/\&gt;:>:g' -e 's:\&lt;\(/audio\):<\1:g' \
-		    -e 's:\(/audio\)\&gt;:\1>:g')
+	front=$(smu "$path"/front.md | tr -d '\n' |
+		sed 's;src="\([^"]*\)";src="/_/'$path'/\1";g')
+	back=$(smu "$path"/back.md | tr -d '\n' |
+		sed 's;src="\([^"]*\)";src="/_/'$path'/\1";g')
 
 	extra="$path"/extra.html
 	if [ -f "$extra" ]; then
@@ -35,4 +31,8 @@ while read line; do
 	fi
 
 	printf "%s\t%s\t%s\n" "$id" "$front" "$back"
-done < $1
+done < $1 \
+| rubify \
+| sed -e 's:/\&gt;:>:g' \
+	-e 's:\&lt;\(/audio\):<\1:g' \
+	-e 's:\(/audio\)\&gt;:\1>:g'
