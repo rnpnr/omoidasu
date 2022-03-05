@@ -13,10 +13,13 @@ usage() {
 
 [ $# -eq 1 ] || usage
 
-deck=$(echo "$1" | cut -d '.' -f 1)
+# remove extension
+deck=${1%.*}
 
-while read line; do
-	id=$(echo "$line" | cut -d $DELIM -f 1)
+# hack to expand DELIM
+IFS=$(printf $DELIM)
+
+while read id _; do
 	path="$deck"/"$id"
 	front=$(smu "$path"/front.md | tr -d '\n' |
 		sed 's;src="\([^"]*\)";src="/_/'$path'/\1";g')
