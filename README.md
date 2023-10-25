@@ -1,7 +1,7 @@
 # omoidasu - 思い出す
 
 A collection of scripts for working with
-[oboeru](https://github.com/0x766F6964/oboeru) 
+[oboeru](https://github.com/rnpnr/oboeru)
 
 ## Installation
 
